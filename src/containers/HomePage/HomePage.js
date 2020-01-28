@@ -289,6 +289,18 @@ const HomePage = props => {
 				}
 				break;
 
+			case "rm":
+				if (terms.length >= 1) {
+					if (dir.rm(terms[0])) {
+						addToOutput(`${terms[0]} was removed.`);
+					} else {
+						addToOutput(`${terms[0]} could not be removed.`);
+					}
+				} else {
+					addToOutput("You must specify an item to remove");
+				}
+				break;
+
 			case "pwd":
 				addToOutput(dir.pwd().split("\n"));
 				break;
@@ -341,7 +353,7 @@ const HomePage = props => {
 			<div
 				style={{ display: "flex", flexFlow: "column", height: "100%" }}
 			>
-				<h1 className="text-center">Terminus</h1>
+				{/* <h1 className="text-center">Terminus</h1> */}
 				<SceneImage image={(item && item.img) || dir.img} />
 				<div id="term" className="terminal d-flex">
 					<div className="terminal-output">

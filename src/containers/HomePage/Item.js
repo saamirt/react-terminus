@@ -1,5 +1,12 @@
 export default class Item {
-	constructor(key, desc, img = null, location = null, moveableTo = []) {
+	constructor(
+		key,
+		desc,
+		img = null,
+		location = null,
+		moveableTo = [],
+		isRemovable = false
+	) {
 		this.key = key;
 		this.desc = desc;
 		this.img = img;
@@ -8,6 +15,7 @@ export default class Item {
 		if (location) {
 			this.moveableTo = [location, ...moveableTo];
 		}
+		this.isRemovable = isRemovable;
 	}
 
 	mv = destRoom => {

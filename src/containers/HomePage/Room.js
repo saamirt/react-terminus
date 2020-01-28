@@ -34,6 +34,14 @@ export default class Room {
 		}
 	};
 
+	rm = key => {
+		if (this.items[key].isRemovable) {
+			this.removeItem(key);
+			return true;
+		}
+		return false;
+	};
+
 	removeItem = key => {
 		delete this.items[key];
 	};

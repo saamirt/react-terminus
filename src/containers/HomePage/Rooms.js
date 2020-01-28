@@ -98,9 +98,6 @@ let Box = new Room(
 	"This box is too small for you to fit into.",
 	"item_box.gif",
 	null,
-	null,
-	[],
-	[],
 	false
 );
 PracticeRoom.addItem(
@@ -269,9 +266,6 @@ let SmallHole = new Room(
 There's no real reason to go into the hole.",
 	"none.gif",
 	["-510px", "-50px"],
-	null,
-	[],
-	{},
 	false
 );
 let Boulder = new Item(
@@ -639,9 +633,19 @@ let ThornyBrambles = new Item(
 	"This thicket of brambles is covered with wicked-looking thorns. You \
 can't go around it, and you definitely aren't about to go through it. And yet something \
 tells you that you really want to.",
-	"item_brambles.gif"
+	"item_brambles.gif",
+	null,
+	[],
+	true
 );
 OminousLookingPath.addItem(ThornyBrambles);
+let origOminousLookingPathRm = OminousLookingPath.rm;
+OminousLookingPath.rm = key => {
+	if (key === ThornyBrambles.key) {
+		OminousLookingPath.addChild(CaveOfDisgruntledTrolls);
+	}
+	return origOminousLookingPathRm(key);
+};
 
 //PARADISE (end game screen)
 let Paradise = new Room(
@@ -707,9 +711,6 @@ let AthenaCluster = new Room(
 have one chance to enter the combination. Enter password:",
 	"loc_cluster.gif",
 	["-510px", "-50px"],
-	null,
-	[],
-	{},
 	false
 );
 let Workstation = new Item(
