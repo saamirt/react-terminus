@@ -10,6 +10,12 @@ export default class Item {
 		}
 	}
 
+	mv = destRoom => {
+		this.location.removeItem(this.key);
+		this.location = destRoom;
+		destRoom.addItem(this);
+	};
+
 	less() {
 		return this.desc;
 	}

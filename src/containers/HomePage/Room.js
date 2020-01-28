@@ -1,52 +1,50 @@
 export default class Room {
-	constructor(
-		key,
-		desc,
-		img = null,
-		map_loc = null,
-		parent = null,
-		children = [],
-		items = {},
-		isEnterable = true
-	) {
+	constructor(key, desc, img = null, map_loc = null, isEnterable = true) {
 		this.key = key;
 		this.desc = desc;
 		this.img = img;
 		this.map_loc = map_loc;
-		this.parent = parent;
-		this.children = children;
-		this.items = items;
+		this.parent = null;
+		this.children = {};
+		this.items = {};
 		this.isEnterable = isEnterable;
 	}
 
-	addParent(parent) {
+	addParent = parent => {
 		this.parent = parent;
-	}
+	};
 
-	addChild(newChild) {
-		this.children.push(newChild);
+	addChild = newChild => {
+		this.children[newChild.key] = newChild;
 		newChild.parent = this;
-	}
+	};
 
-	addItem(newItem) {
+	removeChild = key => {
+		if (this.children[key]) {
+			this.children[key].parent = null;
+			delete this.children[key];
+		}
+	};
+
+	addItem = newItem => {
 		this.items[newItem.key] = newItem;
 		newItem.location = this;
 		if (!newItem.moveableTo.includes(this)) {
 			newItem.moveableTo.push(this);
 		}
-	}
+	};
 
-	removeItem(key) {
+	removeItem = key => {
 		delete this.items[key];
-	}
+	};
 
-	toString() {
+	toString = () => {
 		return this.key;
-	}
+	};
 
 	ls() {
 		let s = ["Locations:"];
-		s.push(...this.children.map(i => `\t${i}`));
+		s.push(...Object.keys(this.children).map(i => `\t${i}`));
 
 		s.push("Items");
 		s.push(...Object.keys(this.items).map(i => `\t${i}`));

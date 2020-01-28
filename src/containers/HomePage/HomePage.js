@@ -39,9 +39,7 @@ const HomePage = props => {
 					}
 					currentRoom = currentRoom.parent;
 				} else {
-					let result = currentRoom.children.find(
-						i => i.key === newRoom
-					);
+					let result = currentRoom.children[newRoom];
 					if (!result) {
 						error = `There is no room at '${fullPath.join("/")}'`;
 						reject(error);
@@ -69,36 +67,30 @@ const HomePage = props => {
 				dirStr.split("/").slice(0, -1)
 			);
 			//check if last term in path matches anything in that directory
-
-			if (
-				currentRoom.children.find(
-					i => i.key.toLowerCase() === last.toLowerCase()
-				)
-			) {
-				if (currentRoom.children.length > 1) {
+			let keys = Object.keys(currentRoom.children);
+			if (keys.find(i => i.toLowerCase() === last.toLowerCase())) {
+				if (keys.length > 1) {
 					let index =
 						Math.max(cmd.lastIndexOf(" "), cmd.lastIndexOf("/")) +
 						1;
 					return (
 						cmd.substr(0, index) +
-						currentRoom.children[
-							(currentRoom.children.indexOf(
-								currentRoom.children.find(
-									i =>
-										i.key.toLowerCase() ===
-										last.toLowerCase()
+						keys[
+							(keys.indexOf(
+								keys.find(
+									i => i.toLowerCase() === last.toLowerCase()
 								)
 							) +
 								1) %
-								currentRoom.children.length
+								keys.length
 						]
 					);
 				}
 				return cmd;
 			} else if (last) {
-				let options = currentRoom.children.filter(i =>
-					i.key.toLowerCase().startsWith(last.toLowerCase())
-				);
+				let options = keys
+					.filter(i => i.toLowerCase().startsWith(last.toLowerCase()))
+					.map(i => currentRoom.children[i]);
 				if (options.length > 0) {
 					return (
 						cmd.substr(0, lastIndex) +
@@ -108,8 +100,8 @@ const HomePage = props => {
 				}
 				return cmd;
 			} else {
-				if (currentRoom.children.length) {
-					return cmd + currentRoom.children.sort()[0].key;
+				if (keys.length) {
+					return cmd + keys.sort()[0];
 				}
 				return cmd;
 			}
@@ -178,7 +170,6 @@ const HomePage = props => {
 		let [cmd, ...terms] = text.trim().split(" ");
 		let group = [];
 		addToOutput(`> ${text}`);
-		let error = "";
 		switch (cmd.toLowerCase()) {
 			case "cd":
 				if (terms.length == 0 || terms[0] == "~") {
@@ -215,9 +206,7 @@ const HomePage = props => {
 						let last = terms[0].substr(
 							terms[0].lastIndexOf("/") + 1
 						);
-						let result = currentRoom.items.find(
-							i => i.key === last
-						);
+						let result = currentRoom.items[last];
 						if (!result) {
 							addToOutput(`There is no '${last}' item here.`);
 						} else {
@@ -286,9 +275,7 @@ const HomePage = props => {
 						}
 
 						//Move item to new room
-						srcItem.location.removeItem(srcItem.key);
-						srcItem.location = destRoom;
-						destRoom.addItem(srcItem);
+						srcItem.mv(destRoom);
 						addToOutput(`Moved ${last} to ${destRoom}`);
 					} catch (error) {
 						addToOutput(error);
@@ -329,15 +316,13 @@ const HomePage = props => {
 					addToOutput(
 						"You have correctly entered the cluster combo. Entering the AthenaCluster."
 					);
-					let newDir = dir.children.find(
-						i => i.key === "AthenaCluster"
-					);
+					let newDir = dir.children["AthenaCluster"];
 					setDir(newDir);
 					break;
 				}
 
 			default:
-				addToOutput(`'${text}' is not recognized as a command.`);
+				addToOutput(`'${cmd}' is not recognized as a command.`);
 				break;
 		}
 		setOutput([...output, group]);

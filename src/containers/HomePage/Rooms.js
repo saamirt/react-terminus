@@ -261,13 +261,6 @@ let DankRoom = new Room(
 	"loc_darkroom.gif",
 	["-510px", "-50px"]
 );
-let Boulder = new Item(
-	"Boulder",
-	"You feel a slight breeze coming from behind the boulder. \
-Maybe move it out of your way?",
-	"item_boulder.gif"
-);
-DankRoom.addItem(Boulder);
 
 //SMALL HOLE
 let SmallHole = new Room(
@@ -275,8 +268,30 @@ let SmallHole = new Room(
 	"There's nothing exciting in the small hole, and it's pretty dirty. \
 There's no real reason to go into the hole.",
 	"none.gif",
-	["-510px", "-50px"]
+	["-510px", "-50px"],
+	null,
+	[],
+	{},
+	false
 );
+let Boulder = new Item(
+	"Boulder",
+	"You feel a slight breeze coming from behind the boulder. \
+Maybe move it out of your way?",
+	"item_boulder.gif",
+	null,
+	[SmallHole]
+);
+let origBoulderMv = Boulder.mv;
+Boulder.mv = destRoom => {
+	if (destRoom !== DankRoom) {
+		Boulder.location.addChild(Tunnel);
+	} else {
+		DankRoom.removeChild(Tunnel.key);
+	}
+	origBoulderMv(destRoom);
+};
+DankRoom.addItem(Boulder);
 
 //TUNNEL
 let Tunnel = new Room(
