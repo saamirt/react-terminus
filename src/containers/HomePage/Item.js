@@ -1,10 +1,13 @@
 export default class Item {
-	constructor(key, desc, img = null, location = null, isMoveable = false) {
+	constructor(key, desc, img = null, location = null, moveableTo = []) {
 		this.key = key;
 		this.desc = desc;
 		this.img = img;
 		this.location = location;
-		this.isMoveable = isMoveable;
+		this.moveableTo = moveableTo;
+		if (location) {
+			this.moveableTo = [location, ...moveableTo];
+		}
 	}
 
 	less() {

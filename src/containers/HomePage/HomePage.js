@@ -45,7 +45,7 @@ const HomePage = props => {
 					if (!result) {
 						error = `There is no room at '${fullPath.join("/")}'`;
 						reject(error);
-					} else if (!result.isPermitted) {
+					} else if (!result.isEnterable && path.length === 1) {
 						error = `Could not enter this room. ${result.desc}`;
 						reject(error);
 					} else {
@@ -188,6 +188,12 @@ const HomePage = props => {
 					let path = terms[0].split("/");
 					try {
 						let currentRoom = await iterateThroughPath(dir, path);
+						if (!currentRoom.isEnterable) {
+							addToOutput(
+								`Could not enter this room. ${currentRoom.desc}`
+							);
+							break;
+						}
 						setDir(currentRoom);
 						addToOutput(`You have moved to ${currentRoom}`);
 						addToOutput(currentRoom.desc);
@@ -198,7 +204,7 @@ const HomePage = props => {
 				break;
 
 			case "less":
-				if (terms.length >= 1) {
+				if (terms.length === 1) {
 					let path = terms[0].split("/");
 
 					try {
@@ -209,21 +215,20 @@ const HomePage = props => {
 						let last = terms[0].substr(
 							terms[0].lastIndexOf("/") + 1
 						);
-						console.log(last);
 						let result = currentRoom.items.find(
 							i => i.key === last
 						);
 						if (!result) {
-							addToOutput(`There is no '${last}' item here`);
+							addToOutput(`There is no '${last}' item here.`);
 						} else {
 							setItem(result);
 							addToOutput(result.desc);
 						}
-					} catch (err) {
+					} catch (error) {
 						addToOutput(error);
 					}
 				} else {
-					addToOutput("Choose an item to use less on");
+					addToOutput("Choose an item to use less on.");
 				}
 				break;
 
@@ -238,14 +243,101 @@ const HomePage = props => {
 				break;
 
 			case "mv":
+				if (terms.length === 2) {
+					let srcPath = terms[0].split("/");
+					try {
+						let srcRoom = await iterateThroughPath(
+							dir,
+							srcPath.slice(0, -1)
+						);
+						let last = terms[0].substr(
+							terms[0].lastIndexOf("/") + 1
+						);
+
+						//make sure src item exists
+						let srcItem =
+							srcRoom.items[
+								Object.keys(srcRoom.items).find(i => i === last)
+							];
+						if (!srcItem) {
+							addToOutput(
+								`Could not find an item called '${last}'.`
+							);
+							break;
+						}
+						if (srcItem.moveableTo.length <= 1) {
+							addToOutput(`The item '${last}' is not moveable.`);
+							break;
+						}
+
+						//get destination room
+						let destPath = terms[1].split("/");
+						let destRoom = await iterateThroughPath(dir, destPath);
+						if (destRoom === srcItem.location) {
+							addToOutput(
+								`The item '${last}' is already in ${destRoom}.`
+							);
+							break;
+						} else if (!srcItem.moveableTo.includes(destRoom)) {
+							addToOutput(
+								`The item '${last}' cannot be moved to ${destRoom}.`
+							);
+							break;
+						}
+
+						//Move item to new room
+						srcItem.location.removeItem(srcItem.key);
+						srcItem.location = destRoom;
+						destRoom.addItem(srcItem);
+						addToOutput(`Moved ${last} to ${destRoom}`);
+					} catch (error) {
+						addToOutput(error);
+					}
+				} else if (terms.length === 1) {
+					addToOutput("Choose a location to move the object.");
+				} else {
+					addToOutput(
+						"You need to specifiy an object and a location to move it to. Use `mv [Thing A] to [Place B]`."
+					);
+				}
 				break;
 
 			case "pwd":
 				addToOutput(dir.pwd().split("\n"));
 				break;
 
+			case "tellme":
+				let valid_rooms = ["MIT", "AthenaCluster", "StataCenter"];
+				if (valid_rooms.includes(dir.key)) {
+					if (
+						terms.length === 1 &&
+						terms[0].toLowerCase() === "combo"
+					) {
+						addToOutput(
+							"The combination is 'terminus' (without the quotes)."
+						);
+					} else {
+						addToOutput(
+							"Incorrect syntax. Ask the OldMan for help with the `man` command."
+						);
+					}
+					break;
+				}
+
+			case "terminus":
+				if (dir.key === "MIT") {
+					addToOutput(
+						"You have correctly entered the cluster combo. Entering the AthenaCluster."
+					);
+					let newDir = dir.children.find(
+						i => i.key === "AthenaCluster"
+					);
+					setDir(newDir);
+					break;
+				}
+
 			default:
-				addToOutput(`'${text}' is not recognized as a command`);
+				addToOutput(`'${text}' is not recognized as a command.`);
 				break;
 		}
 		setOutput([...output, group]);
@@ -288,7 +380,7 @@ const HomePage = props => {
 						<span></span>
 						<input
 							autoFocus
-							maxLength="80"
+							maxLength="280"
 							className="clipboard"
 							value={cmd}
 							onChange={handleInputChange}

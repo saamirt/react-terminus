@@ -6,8 +6,8 @@ export default class Room {
 		map_loc = null,
 		parent = null,
 		children = [],
-		items = [],
-		isPermitted = true
+		items = {},
+		isEnterable = true
 	) {
 		this.key = key;
 		this.desc = desc;
@@ -16,7 +16,7 @@ export default class Room {
 		this.parent = parent;
 		this.children = children;
 		this.items = items;
-		this.isPermitted = isPermitted;
+		this.isEnterable = isEnterable;
 	}
 
 	addParent(parent) {
@@ -29,8 +29,15 @@ export default class Room {
 	}
 
 	addItem(newItem) {
-		this.items.push(newItem);
+		this.items[newItem.key] = newItem;
 		newItem.location = this;
+		if (!newItem.moveableTo.includes(this)) {
+			newItem.moveableTo.push(this);
+		}
+	}
+
+	removeItem(key) {
+		delete this.items[key];
 	}
 
 	toString() {
@@ -42,7 +49,7 @@ export default class Room {
 		s.push(...this.children.map(i => `\t${i}`));
 
 		s.push("Items");
-		s.push(...this.items.map(i => `\t${i}`));
+		s.push(...Object.keys(this.items).map(i => `\t${i}`));
 
 		return s;
 	}

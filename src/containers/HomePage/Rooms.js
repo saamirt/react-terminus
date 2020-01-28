@@ -92,22 +92,6 @@ If you don't know any spells yet, go back and check out some Lessons.",
 		"item_manuscript.gif"
 	)
 );
-PracticeRoom.addItem(
-	new Item("PracticeDummy1", "It's a practice dummy", "item_dummy.gif")
-);
-PracticeRoom.addItem(
-	new Item("PracticeDummy2", "It's a practice dummy", "item_dummy.gif")
-);
-PracticeRoom.addItem(
-	new Item("PracticeDummy3", "It's a practice dummy", "item_dummy.gif")
-);
-PracticeRoom.addItem(
-	new Item("PracticeDummy4", "It's a practice dummy", "item_dummy.gif")
-);
-PracticeRoom.addItem(
-	new Item("PracticeDummy5", "It's a practice dummy", "item_dummy.gif")
-);
-
 //BOX
 let Box = new Room(
 	"Box",
@@ -118,6 +102,51 @@ let Box = new Room(
 	[],
 	[],
 	false
+);
+PracticeRoom.addItem(
+	new Item(
+		"PracticeDummy1",
+		"It's a practice dummy",
+		"item_dummy.gif",
+		null,
+		[Box]
+	)
+);
+PracticeRoom.addItem(
+	new Item(
+		"PracticeDummy2",
+		"It's a practice dummy",
+		"item_dummy.gif",
+		null,
+		[Box]
+	)
+);
+PracticeRoom.addItem(
+	new Item(
+		"PracticeDummy3",
+		"It's a practice dummy",
+		"item_dummy.gif",
+		null,
+		[Box]
+	)
+);
+PracticeRoom.addItem(
+	new Item(
+		"PracticeDummy4",
+		"It's a practice dummy",
+		"item_dummy.gif",
+		null,
+		[Box]
+	)
+);
+PracticeRoom.addItem(
+	new Item(
+		"PracticeDummy5",
+		"It's a practice dummy",
+		"item_dummy.gif",
+		null,
+		[Box]
+	)
 );
 
 //NORTHERN MEADOW
@@ -662,7 +691,11 @@ let AthenaCluster = new Room(
 	"None shall pass without the combination. You \
 have one chance to enter the combination. Enter password:",
 	"loc_cluster.gif",
-	["-510px", "-50px"]
+	["-510px", "-50px"],
+	null,
+	[],
+	{},
+	false
 );
 let Workstation = new Item(
 	"Workstation",
