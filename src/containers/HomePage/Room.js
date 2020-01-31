@@ -35,7 +35,7 @@ export default class Room {
 	};
 
 	rm = key => {
-		if (this.items[key].isRemovable) {
+		if (this.items[key] && this.items[key].isRemovable) {
 			this.removeItem(key);
 			return true;
 		}

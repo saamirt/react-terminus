@@ -55,7 +55,7 @@ const HomePage = props => {
 		});
 	};
 
-	const autoCompleteInput = async () => {
+	const autoComplete = async getChildren => {
 		let lastIndex = cmd.lastIndexOf(" ") + 1;
 		let dirStr = cmd.substr(lastIndex).trim();
 
@@ -66,8 +66,9 @@ const HomePage = props => {
 				dir,
 				dirStr.split("/").slice(0, -1)
 			);
+			let children = getChildren(currentRoom);
 			//check if last term in path matches anything in that directory
-			let keys = Object.keys(currentRoom.children);
+			let keys = Object.keys(children);
 			if (keys.find(i => i.toLowerCase() === last.toLowerCase())) {
 				if (keys.length > 1) {
 					let index =
@@ -90,7 +91,7 @@ const HomePage = props => {
 			} else if (last) {
 				let options = keys
 					.filter(i => i.toLowerCase().startsWith(last.toLowerCase()))
-					.map(i => currentRoom.children[i]);
+					.map(i => children[i]);
 				if (options.length > 0) {
 					return (
 						cmd.substr(0, lastIndex) +
@@ -108,6 +109,14 @@ const HomePage = props => {
 		} catch (err) {
 			return cmd;
 		}
+	};
+
+	const autoCompleteLocation = async () => {
+		return await autoComplete(currentRoom => currentRoom.children);
+	};
+
+	const autoCompleteItem = async () => {
+		return await autoComplete(currentRoom => currentRoom.items);
 	};
 
 	const handleInputChange = event => {
@@ -129,7 +138,13 @@ const HomePage = props => {
 
 			case "Tab":
 				event.preventDefault();
-				setCmd(await autoCompleteInput());
+				let text = event.target.value;
+				let command = text.substr(0, text.indexOf(" "));
+				if (["less", "mv", "rm", "cp", "grep"].includes(command)) {
+					setCmd(await autoCompleteItem());
+				} else {
+					setCmd(await autoCompleteLocation());
+				}
 				break;
 
 			case "ArrowUp":
@@ -294,7 +309,7 @@ const HomePage = props => {
 					if (dir.rm(terms[0])) {
 						addToOutput(`${terms[0]} was removed.`);
 					} else {
-						addToOutput(`${terms[0]} could not be removed.`);
+						addToOutput(`'${terms[0]}' could not be removed.`);
 					}
 				} else {
 					addToOutput("You must specify an item to remove");
