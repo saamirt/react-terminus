@@ -56,48 +56,27 @@ const HomePage = props => {
 	};
 
 	const autoComplete = async getChildren => {
-		let lastIndex = cmd.lastIndexOf(" ") + 1;
-		let dirStr = cmd.substr(lastIndex).trim();
-
 		//iterate through path
-		let last = dirStr.substr(dirStr.lastIndexOf("/") + 1);
 		try {
-			let currentRoom = await iterateThroughPath(
-				dir,
-				dirStr.split("/").slice(0, -1)
-			);
+			let dirStr = cmd.substr(cmd.lastIndexOf(" ") + 1).trim();
+			let currentRoom = await iterateThroughPath(dir, dirStr.split("/").slice(0, -1));
 			let children = getChildren(currentRoom);
-			//check if last term in path matches anything in that directory
 			let keys = Object.keys(children);
-			if (keys.find(i => i.toLowerCase() === last.toLowerCase())) {
-				if (keys.length > 1) {
-					let index =
-						Math.max(cmd.lastIndexOf(" "), cmd.lastIndexOf("/")) +
-						1;
-					return (
-						cmd.substr(0, index) +
-						keys[
-							(keys.indexOf(
-								keys.find(
-									i => i.toLowerCase() === last.toLowerCase()
-								)
-							) +
-								1) %
-								keys.length
-						]
-					);
-				}
-				return cmd;
+			let index = Math.max(cmd.lastIndexOf(" "), cmd.lastIndexOf("/")) + 1;
+			let last = cmd.substr(index);
+
+			//check if last term in path matches anything in that directory
+			let match = keys.find(i => i.toLowerCase() === last.toLowerCase());
+			if (match) {
+				//if what user typed matches something
+				return cmd.substr(0, index) + keys[(keys.indexOf(match) + 1) % keys.length];
 			} else if (last) {
+				//if the user typed anything
 				let options = keys
 					.filter(i => i.toLowerCase().startsWith(last.toLowerCase()))
 					.map(i => children[i]);
 				if (options.length > 0) {
-					return (
-						cmd.substr(0, lastIndex) +
-						dirStr.substr(0, dirStr.lastIndexOf("/") + 1) +
-						options.sort()[0]
-					);
+					return cmd.substr(0, index) + options.sort()[0];
 				}
 				return cmd;
 			} else {
@@ -107,6 +86,7 @@ const HomePage = props => {
 				return cmd;
 			}
 		} catch (err) {
+			console.log(err);
 			return cmd;
 		}
 	};
@@ -121,8 +101,7 @@ const HomePage = props => {
 
 	const handleInputChange = event => {
 		const target = event.target;
-		const value =
-			target.type === "checkbox" ? target.checked : target.value;
+		const value = target.type === "checkbox" ? target.checked : target.value;
 
 		setCmd(value);
 	};
@@ -195,9 +174,7 @@ const HomePage = props => {
 					try {
 						let currentRoom = await iterateThroughPath(dir, path);
 						if (!currentRoom.isEnterable) {
-							addToOutput(
-								`Could not enter this room. ${currentRoom.desc}`
-							);
+							addToOutput(`Could not enter this room. ${currentRoom.desc}`);
 							break;
 						}
 						setDir(currentRoom);
@@ -214,13 +191,8 @@ const HomePage = props => {
 					let path = terms[0].split("/");
 
 					try {
-						let currentRoom = await iterateThroughPath(
-							dir,
-							path.slice(0, -1)
-						);
-						let last = terms[0].substr(
-							terms[0].lastIndexOf("/") + 1
-						);
+						let currentRoom = await iterateThroughPath(dir, path.slice(0, -1));
+						let last = terms[0].substr(terms[0].lastIndexOf("/") + 1);
 						let result = currentRoom.items[last];
 						if (!result) {
 							addToOutput(`There is no '${last}' item here.`);
@@ -250,23 +222,14 @@ const HomePage = props => {
 				if (terms.length === 2) {
 					let srcPath = terms[0].split("/");
 					try {
-						let srcRoom = await iterateThroughPath(
-							dir,
-							srcPath.slice(0, -1)
-						);
-						let last = terms[0].substr(
-							terms[0].lastIndexOf("/") + 1
-						);
+						let srcRoom = await iterateThroughPath(dir, srcPath.slice(0, -1));
+						let last = terms[0].substr(terms[0].lastIndexOf("/") + 1);
 
 						//make sure src item exists
 						let srcItem =
-							srcRoom.items[
-								Object.keys(srcRoom.items).find(i => i === last)
-							];
+							srcRoom.items[Object.keys(srcRoom.items).find(i => i === last)];
 						if (!srcItem) {
-							addToOutput(
-								`Could not find an item called '${last}'.`
-							);
+							addToOutput(`Could not find an item called '${last}'.`);
 							break;
 						}
 						if (srcItem.moveableTo.length <= 1) {
@@ -278,14 +241,10 @@ const HomePage = props => {
 						let destPath = terms[1].split("/");
 						let destRoom = await iterateThroughPath(dir, destPath);
 						if (destRoom === srcItem.location) {
-							addToOutput(
-								`The item '${last}' is already in ${destRoom}.`
-							);
+							addToOutput(`The item '${last}' is already in ${destRoom}.`);
 							break;
 						} else if (!srcItem.moveableTo.includes(destRoom)) {
-							addToOutput(
-								`The item '${last}' cannot be moved to ${destRoom}.`
-							);
+							addToOutput(`The item '${last}' cannot be moved to ${destRoom}.`);
 							break;
 						}
 
@@ -323,13 +282,8 @@ const HomePage = props => {
 			case "tellme":
 				let valid_rooms = ["MIT", "AthenaCluster", "StataCenter"];
 				if (valid_rooms.includes(dir.key)) {
-					if (
-						terms.length === 1 &&
-						terms[0].toLowerCase() === "combo"
-					) {
-						addToOutput(
-							"The combination is 'terminus' (without the quotes)."
-						);
+					if (terms.length === 1 && terms[0].toLowerCase() === "combo") {
+						addToOutput("The combination is 'terminus' (without the quotes).");
 					} else {
 						addToOutput(
 							"Incorrect syntax. Ask the OldMan for help with the `man` command."
@@ -359,15 +313,10 @@ const HomePage = props => {
 		<div className="h-100">
 			<Helmet>
 				<title>Terminus</title>
-				<meta
-					name="description"
-					content="A React.js based linux terminal learning game"
-				/>
+				<meta name="description" content="A React.js based linux terminal learning game" />
 			</Helmet>
 
-			<div
-				style={{ display: "flex", flexFlow: "column", height: "100%" }}
-			>
+			<div style={{ display: "flex", flexFlow: "column", height: "100%" }}>
 				{/* <h1 className="text-center">Terminus</h1> */}
 				<SceneImage image={(item && item.img) || dir.img} />
 				<div id="term" className="terminal d-flex">
@@ -375,10 +324,7 @@ const HomePage = props => {
 						{output.map((group, i) => (
 							<div className="terminal-output-group" key={i}>
 								{group.map((line, j) => (
-									<pre
-										className="terminal-output-line"
-										key={j}
-									>
+									<pre className="terminal-output-line" key={j}>
 										{line}
 									</pre>
 								))}
